@@ -15,9 +15,25 @@ function getContratos(req, res) {
   const page = parseInt(req.query.page) || 1;
   const limit = 10;
   const offset = (page - 1) * limit;
+  const status = req.query.status;
 
-  const total = db.prepare('SELECT COUNT(*) as count FROM contratos').get().count;
-  const contratos = db.prepare('SELECT * FROM contratos ORDER BY created_at DESC LIMIT ? OFFSET ?').all(limit, offset);
+  let countQuery = 'SELECT COUNT(*) as count FROM contratos';
+  let dataQuery = 'SELECT * FROM contratos';
+  let countParams = [];
+  let dataParams = [];
+
+  if (status) {
+    countQuery += ' WHERE status = ?';
+    dataQuery += ' WHERE status = ?';
+    countParams.push(status);
+    dataParams.push(status);
+  }
+
+  dataQuery += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
+  dataParams.push(limit, offset);
+
+  const total = db.prepare(countQuery).get(...countParams).count;
+  const contratos = db.prepare(dataQuery).all(...dataParams);
 
   res.json({
     data: contratos,
