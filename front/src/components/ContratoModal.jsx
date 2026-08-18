@@ -9,9 +9,6 @@ const initialForm = {
   fecha_reserva: '',
 };
 
-// TODO: Bug #3 - Inline validation doesn't work correctly
-// The errors state is declared but validation runs only on submit, not on field change
-// Fix: add onChange validation per field or use a proper validation library
 function ContratoModal({ onClose, onSuccess }) {
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
@@ -20,8 +17,10 @@ function ContratoModal({ onClose, onSuccess }) {
   function handleChange(e) {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
-    // TODO: Bug #3 - validation should clear/set error here on each keystroke
-    // Currently errors only reset on submit, giving misleading UX
+
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: undefined }));
+    }
   }
 
   function validate() {
@@ -42,9 +41,7 @@ function ContratoModal({ onClose, onSuccess }) {
     e.preventDefault();
     const newErrors = validate();
 
-    // TODO: Bug #3 - Even when errors exist, the form tries to submit anyway
-    // because the condition below is inverted
-    if (Object.keys(newErrors).length === 0) {
+    if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
