@@ -14,13 +14,14 @@ function Contratos() {
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [filtros, setFiltros] = useState({ nombre: '', status: '' });
 
   async function fetchContratos(page = 1) {
     setLoading(true);
     try {
-      const { data } = await contratosApi.getAll(page);
-      setContratos(data.data);
-      setPagination(data.pagination);
+      const { data } = await contratosApi.getAll(page, filtros);
+      setContratos(data.data || []);
+      setPagination(data.pagination || { page: 1, totalPages: 1, total: 0 });
     } catch (err) {
       console.error('Error fetching contratos:', err);
     } finally {
@@ -63,7 +64,37 @@ function Contratos() {
           + Nuevo Contrato
         </button>
       </div>
-
+      <div className="bg-white p-4 rounded-xl shadow-sm mb-6 flex gap-4 items-end">
+        <div className="flex-1">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Buscar por nombre</label>
+          <input
+            type="text"
+            placeholder="Ej. Juan..."
+            value={filtros.nombre}
+            onChange={(e) => setFiltros({ ...filtros, nombre: e.target.value })}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <div className="w-48">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <select
+            value={filtros.status}
+            onChange={(e) => setFiltros({ ...filtros, status: e.target.value })}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Todos</option>
+            <option value="Pendiente de firma">Pendiente de firma</option>
+            <option value="Firmado">Firmado</option>
+            <option value="Cancelado">Cancelado</option>
+          </select>
+        </div>
+        <button
+          onClick={() => fetchContratos(1)} // Al buscar, siempre regresamos a la página 1
+          className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 border border-gray-300"
+        >
+          Buscar
+        </button>
+      </div>
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <div className='overflow-x-auto'>
           <table className="min-w-full text-sm">
