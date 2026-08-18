@@ -27,13 +27,26 @@ function ContratoModal({ onClose, onSuccess }) {
     const newErrors = {};
     if (!form.nombre.trim()) newErrors.nombre = 'El nombre es obligatorio';
     if (!form.apellidos.trim()) newErrors.apellidos = 'Los apellidos son obligatorios';
-    if (!form.telefono.trim()) newErrors.telefono = 'El teléfono es obligatorio';
+    if (!form.telefono.trim()) {
+      newErrors.telefono = 'El teléfono es obligatorio';
+    } else if (!/^\d+$/.test(form.telefono)) {
+      newErrors.telefono = 'El teléfono solo debe contener números';
+    } 
     if (!form.email.trim()) {
       newErrors.email = 'El email es obligatorio';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
       newErrors.email = 'El email no es válido';
     }
-    if (!form.fecha_reserva) newErrors.fecha_reserva = 'La fecha de reserva es obligatoria';
+    if (!form.fecha_reserva) {
+      newErrors.fecha_reserva = 'La fecha de reserva es obligatoria';
+    } else {
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
+      const fechaSeleccionada = new Date(form.fecha_reserva + 'T00:00:00');
+      if (fechaSeleccionada < hoy) {
+        newErrors.fecha_reserva = 'La fecha no puede ser anterior al día de hoy';
+      }
+    }
     return newErrors;
   }
 
