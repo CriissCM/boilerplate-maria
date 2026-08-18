@@ -15,18 +15,31 @@ function getContratos(req, res) {
   const page = parseInt(req.query.page) || 1;
   const limit = 10;
   const offset = (page - 1) * limit;
-  const status = req.query.status;
+  const { status, nombre } = req.query;
 
   let countQuery = 'SELECT COUNT(*) as count FROM contratos';
   let dataQuery = 'SELECT * FROM contratos';
   let countParams = [];
   let dataParams = [];
+  let conditions = [];
 
   if (status) {
-    countQuery += ' WHERE status = ?';
-    dataQuery += ' WHERE status = ?';
+    conditions.push('status = ?');
     countParams.push(status);
     dataParams.push(status);
+  }
+
+  if (nombre) {
+    conditions.push('nombre LIKE ?');
+    const nombreSearch = `%${nombre}%`;
+    countParams.push(nombreSearch);
+    dataParams.push(nombreSearch);
+  }
+
+  if (conditions.length > 0) {
+    const whereClause = ' WHERE ' + conditions.join(' AND ');
+    countQuery += whereClause;
+    dataQuery += whereClause;
   }
 
   dataQuery += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
